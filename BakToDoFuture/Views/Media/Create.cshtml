@@ -1,0 +1,100 @@
+﻿@model BakToDoFuture.Models.Media
+
+@{
+    ViewBag.Title = "Yeni Dosya";
+}
+<link href="/assets/global/plugins/dropzone/dropzone.min.css" rel="stylesheet" type="text/css" />
+<link href="/assets/global/plugins/dropzone/basic.min.css" rel="stylesheet" type="text/css" />
+<style>
+
+    #my-dropzone {
+        background: gray;
+        border: black dashed 3px;
+        width: 450px;
+        padding: 50px;
+        text-align: center;
+        color: white;
+    }
+</style>
+<h2>Dosya Ekle</h2>
+
+
+@using (Html.BeginForm("Create", "Media", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+        <h4>Dosya</h4>
+        <hr />
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        <div class="form-group">
+            @Html.LabelFor(model => model.Name, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.Name, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-danger" })
+            </div>
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(model => model.Description, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.TextAreaFor(model => model.Description, htmlAttributes: new { @class = "form-control" })
+                @Html.ValidationMessageFor(model => model.Description, "", new { @class = "text-danger" })
+            </div>
+        </div>
+        @Html.HiddenFor(model => model.Extension)
+        @Html.HiddenFor(model => model.ContentType)
+        
+        <div class="form-group">
+            <label class="control-label col-md-2">Dosya:</label>
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.FilePath, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.FilePath, "", new { @class = "text-danger" })
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="control-label col-md-2">Dosya Yükle:</label>
+            <div class="col-md-10 dropzone dropzone-file-area" id="my-dropzone">
+                <h3 class="sbold">Dosyayı buraya sürükleyin veya tıklayın.</h3>
+            </div>
+        </div>
+
+        @Html.HiddenFor(model => model.FileSize)
+        @Html.HiddenFor(model => model.Year, new { @Value = DateTime.Now.Year.ToString() })
+        @Html.HiddenFor(model => model.Month, new { @Value = DateTime.Now.Month.ToString() })
+
+        @Html.HiddenFor(model => model.CreateDate)
+        @Html.HiddenFor(model => model.CreatedBy)
+        @Html.HiddenFor(model => model.UpdateDate)
+        @Html.HiddenFor(model => model.UpdateBy)
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Oluştur" class="btn btn-primary" />
+            </div>
+        </div>
+    </div>
+}
+<div>
+    @Html.ActionLink("Listeye Geri Dön", "Index")
+</div>
+@section Scripts {
+    <script src="/assets/global/plugins/dropzone/dropzone.min.js" type="text/javascript"></script>
+    <script>
+        $("div#my-dropzone").dropzone({
+            url: "/Media/SaveUploadedFile",
+            uploadMultiple: false,
+            maxFiles: 1,
+            init: function () {
+                this.on("complete", function (data) {
+                    //var res = eval('(' + data.xhr.responseText + ')');
+                    var res = JSON.parse(data.xhr.responseText);
+                    $("#FilePath").val(res.Message);
+                    if (res.success === false) {
+                        $("#FilePath").css("border-color", "red");
+                    }
+                });
+            }
+        });
+        //File Upload response from the server</script>
+    @Scripts.Render("~/bundles/jqueryval")
+}
+
